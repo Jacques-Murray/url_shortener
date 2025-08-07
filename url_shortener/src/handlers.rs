@@ -17,20 +17,28 @@ pub async fn shorten(
 ) -> impl IntoResponse {
     let id = nanoid!(7);
     let server_address = env::var("SERVER_ADDRESS").expect("SERVER_ADDRESS must be set");
+    let protocol = env::var("SERVER_PROTOCOL").unwrap_or_else(|_| "https".to_string());
 
     match save_url(&pool, &id, &payload.url).await {
         Ok(_) => {
             let response = ShortenResponse {
-                short_url: format!("http://{}/{}", server_address, id),
+                short_url: format!("{}://{}/{}", protocol, server_address, id),
             };
             (StatusCode::CREATED, Json(response)).into_response()
         }
+        Err(e) => {
+            eprintln!("Failed to save URL: {:?}", e);
+            StatusCode::INTERNAL_SERVER_ERROR.into_response()
+        },
         Err(_) => StatusCode::INTERNAL_SERVER_ERROR.into_response(),
     }
-}
-
-pub async fn redirect(State(pool): State<SqlitePool>, Path(id): Path<String>) -> impl IntoResponse {
     match find_url_by_id(&pool, &id).await {
+        Ok(record) => Redirect::to(&record.original_url).into_response(),
+        Err(e) => {
+            eprintln!("Error finding URL by id '{}': {:?}", id, e);
+            StatusCode::NOT_FOUND.into_response()
+        }
+    }
         Ok(record) => Redirect::to(&record.original_url).into_response(),
         Err(_) => StatusCode::NOT_FOUND.into_response(),
     }
