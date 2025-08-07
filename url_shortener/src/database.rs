@@ -12,7 +12,7 @@ pub async fn create_db_pool() -> Result<Pool<Sqlite>, sqlx::Error> {
 }
 
 pub async fn find_url_by_id(pool: &Pool<Sqlite>, id: &str) -> Result<UrlRecord, sqlx::Error> {
-    sqlx::query_as::<_, UrlRecord>("SELECT id, original_url FROM urls WHERE id = ?")
+    sqlx::query_as::<_, UrlRecord>("SELECT original_url FROM urls WHERE id = ?")
         .bind(id)
         .fetch_one(pool)
         .await
