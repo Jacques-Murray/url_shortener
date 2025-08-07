@@ -8,7 +8,7 @@ axum = "0.8.4"
 dotenvy = "0.15.7"
 http = "1.3.1"
 nanoid = "0.4.0"
-serde = "1.0.219"
-sqlx = "0.8.6"
-tokio = "1.47.1"
+serde = { version = "1.0.219", features = ["derive"] }
+sqlx = { version = "0.8.6", features = ["runtime-tokio", "sqlite"] }
+tokio = { version = "1.47.1", features = ["full"] }
 tower-http = "0.6.6"

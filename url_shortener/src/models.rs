@@ -12,6 +12,5 @@ pub struct ShortenResponse {
 
 #[derive(sqlx::FromRow)]
 pub struct UrlRecord {
-    pub id: String,
     pub original_url: String,
 }
