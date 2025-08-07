@@ -5,6 +5,18 @@ mod routes;
 
 use dotenvy::dotenv;
 use std::env;
+// Configuration struct for environment-based settings
+// AppState struct to hold both SqlitePool and Config
+#[derive(Clone)]
+pub struct AppState {
+    pub pool: sqlx::SqlitePool,
+    pub config: Config,
+}
+#[derive(Clone)]
+pub struct Config {
+    pub server_address: String,
+    pub protocol: String,
+}
 
 #[tokio::main]
 async fn main() {
@@ -14,13 +26,23 @@ async fn main() {
         .await
         .expect("Failed to create database pool");
 
-    let app = routes::create_router(pool);
+    // Load configuration from environment
+    let config = Config {
+        server_address: env::var("SERVER_ADDRESS").unwrap_or_else(|_| "localhost:3000".to_string()),
+        protocol: env::var("SERVER_PROTOCOL").unwrap_or_else(|_| "http".to_string()),
+    };
 
-    let server_address = env::var("SERVER_ADDRESS").expect("SERVER_ADDRESS must be set");
-    let listener = tokio::net::TcpListener::bind(&server_address)
+    let app_state = AppState {
+        pool,
+        config: config.clone(),
+    };
+
+    let app = routes::create_router(app_state.clone());
+
+    let listener = tokio::net::TcpListener::bind(&config.server_address)
         .await
         .unwrap();
-    println!("Listening on {}", server_address);
+    println!("Listening on {}", config.server_address);
 
     axum::serve(listener, app).await.unwrap();
 }
