@@ -1,0 +1,19 @@
+# Rust and Cargo build artifacts
+# This directory contains compiled code and dependencies.
+/url_shortener/target/
+
+# Local database file
+# Your SQLite database should not be part of the repository.
+/url_shortener/urls.db
+
+# Environment variables
+# This file contains local configuration and secrets.
+.env
+
+# IDE and editor directories
+.vscode/
+.idea/
+
+# OS-generated files
+.DS_Store
+Thumbs.db
